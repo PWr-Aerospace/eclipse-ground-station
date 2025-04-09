@@ -3,25 +3,27 @@ project(EclipseGS VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_AUTOMOC ON)  # Enable automatic moc generation
+set(CMAKE_AUTOMOC ON) 
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network)
 
-# List all source files explicitly
 set(SOURCES
+    src/MainWindow.cpp
     src/DiscoveryService.cpp
+    src/DiscoveryPanel.cpp
     src/VideoStream.cpp
-    src/VideoReceiver.cpp
+    src/VideoWidget.cpp
     src/main.cpp
 )
 
-# List all header files explicitly
 set(HEADERS
+    include/MainWindow.h
     include/DiscoveryService.h
+    include/DiscoveryPanel.h
     include/VideoStream.h
-    include/VideoReceiver.h
+    include/VideoWidget.h
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
