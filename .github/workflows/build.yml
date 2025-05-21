@@ -28,8 +28,12 @@ jobs:
       - name: Install dependencies on Windows
         if: matrix.os == 'windows-latest'
         run: |
-          choco install --no-progress -y qt6-base-dev cmake.install
-          refreshenv
+          choco install --no-progress -y qt6-base-dev cmake.install --pre
+
+      - name: Refresh environment
+        if: matrix.os == 'windows-latest'
+        shell: cmd
+        run: refreshenv
 
       - name: Configure CMake on Linux
         if: matrix.os == 'ubuntu-latest'
