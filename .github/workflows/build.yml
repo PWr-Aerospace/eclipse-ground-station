@@ -25,14 +25,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential cmake qt6-base-dev qt6-base-dev-tools
 
-      - name: Set up vcpkg on Windows
-        if: matrix.os == 'windows-latest'
-        uses: lukka/get-vcpkg@v20
-
-      - name: Install Qt6 on Windows
+      - name: Install dependencies on Windows
         if: matrix.os == 'windows-latest'
         run: |
-          "${{ env.VCPKG_ROOT }}/vcpkg" install qt6-base:x64-windows
+          choco install --no-progress -y qt6-base cmake
 
       - name: Configure CMake on Linux
         if: matrix.os == 'ubuntu-latest'
@@ -40,7 +36,7 @@ jobs:
 
       - name: Configure CMake on Windows
         if: matrix.os == 'windows-latest'
-        run: cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake"
+        run: cmake -S . -B build -A x64
 
       - name: Build
         run: cmake --build build --config Release --parallel
