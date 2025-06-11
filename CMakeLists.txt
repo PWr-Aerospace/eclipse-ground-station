@@ -3,11 +3,26 @@ project(EclipseGS VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_AUTOMOC ON) 
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
+
+
+set(CMAKE_AUTOMOC OFF)
+set(CMAKE_AUTORCC OFF)
+set(CMAKE_AUTOUIC OFF)
+
 
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network)
+
+
+include(FetchContent)
+
+FetchContent_Declare(
+  SDL2
+  GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+  GIT_TAG release-2.28.5
+)
+
+FetchContent_MakeAvailable(SDL2)
+
 
 set(SOURCES
     src/MainWindow.cpp
@@ -16,6 +31,8 @@ set(SOURCES
     src/VideoStream.cpp
     src/VideoWidget.cpp
     src/main.cpp
+    src/GamepadController.cpp
+    src/LoggerWidget.cpp   
 )
 
 set(HEADERS
@@ -24,13 +41,32 @@ set(HEADERS
     include/DiscoveryPanel.h
     include/VideoStream.h
     include/VideoWidget.h
+    include/GamepadController.h
+    include/LoggerWidget.h 
 )
+
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
-target_include_directories(${PROJECT_NAME} PRIVATE include)
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    AUTOMOC ON
+    AUTORCC ON
+    AUTOUIC ON
+    WIN32_EXECUTABLE ON
+)
+
+
+include_directories(${sdl2_SOURCE_DIR}/include)
+
+target_include_directories(${PROJECT_NAME} PRIVATE 
+    include 
+    ${sdl2_SOURCE_DIR}/include
+)
+
+
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     Qt6::Core 
     Qt6::Widgets 
     Qt6::Network
+    SDL2-static
 )
