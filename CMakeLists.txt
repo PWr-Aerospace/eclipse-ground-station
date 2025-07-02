@@ -9,9 +9,7 @@ set(CMAKE_AUTOMOC OFF)
 set(CMAKE_AUTORCC OFF)
 set(CMAKE_AUTOUIC OFF)
 
-
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network)
-
 
 include(FetchContent)
 
@@ -22,7 +20,6 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(SDL2)
-
 
 set(SOURCES
     src/MainWindow.cpp
@@ -70,3 +67,20 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Network
     SDL2-static
 )
+
+# Deploy for Windows
+if (WIN32)
+    find_program(QT_WINDEPLOYQT windeployqt
+                 HINTS "$ENV{Qt6_DIR}/../../../bin"   
+                       "${Qt6Core_DIR}/../../../bin"
+                 REQUIRED)
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND "${QT_WINDEPLOYQT}"
+                $<$<CONFIG:Debug>:--debug>$<$<CONFIG:Release>:--release>
+                --compiler-runtime
+                "$<TARGET_FILE:${PROJECT_NAME}>"
+        COMMENT "Running windeployqt on $<CONFIG>"
+        VERBATIM
+    )
+endif()

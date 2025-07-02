@@ -42,3 +42,6 @@ Thumbs.db
 *.config
 *.files
 *.includes
+/.vs
+/CMakePresets.json
+/CMakeUserPresets.json
