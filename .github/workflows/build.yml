@@ -2,63 +2,26 @@
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
-
-env:
-  BUILD_TYPE: Release
+    branches:
+      - main
 
 jobs:
   build-linux:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Install build tools & SDL2 headers
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential ninja-build \
-                                  libsdl2-dev
+          sudo apt-get install -y cmake g++ qt6-base-dev libsdl2-dev
 
-      - name: Install Qt 6.7.2
-        uses: jurplel/install-qt-action@v4.3.0
-        with:
-          version:      '6.7.2'           
-          host:         'linux'
-          target:       'desktop'
-          arch:         'gcc_64'
-          tools:        'tools_windeployqt'  
+      - name: Configure project
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
-      - name: Configure (Ninja + GCC)
-        run: cmake -S . -B build \
-              -G Ninja \
-              -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
-
-      - name: Build
-        run: cmake --build build --config $BUILD_TYPE --parallel
-
-  build-windows:
-    runs-on: windows-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Install Qt 6.7.2 
-        uses: jurplel/install-qt-action@v4.3.0  
-        with:
-          version: '6.7.*'
-          host:    'windows'
-          target:  'desktop'
-          arch:    'win64_msvc2022_64'
-          tools:   'tools_windeployqt'
-
-      - name: Configure (Visual Studio 17 2022)
-        run: |
-          cmake -S . -B build ^
-                -G "Visual Studio 17 2022" ^
-                -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
-
-      - name: Build
-        run: cmake --build build --config %BUILD_TYPE% --parallel
+      - name: Build project
+        run: cmake --build build --config Release
