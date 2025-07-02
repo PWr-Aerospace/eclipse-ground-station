@@ -1,45 +1,56 @@
-name: Build EclipseGS
+﻿name: Build EclipseGS
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
+
+env:
+  BUILD_TYPE: Release
 
 jobs:
+
   build-linux:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
 
-      - name: Install dependencies
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install system packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake g++ qt6-base-dev libsdl2-dev
+          sudo apt-get install -y \
+            cmake g++ make \
+            qt6-base-dev qt6-tools-dev \
+            libsdl2-dev
 
-      - name: Configure project
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
 
-      - name: Build project
-        run: cmake --build build --config Release
+      - name: Build
+        run: cmake --build build --config $BUILD_TYPE --parallel
 
   build-windows:
     runs-on: windows-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Install dependencies
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4   
+        with:
+          version: '6.7.2'               
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2022_64'
+          tools: 'tools_windeployqt'       
+
+      - name: Configure CMake (MSVC 2022)
         run: |
-          choco install cmake --installargs '"ADD_CMAKE_TO_PATH=System"'
-          choco install qt6
-          choco install sdl2
+          cmake -S . -B build ^
+                -G "Visual Studio 17 2022" ^
+                -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
 
-      - name: Configure project
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build project
-        run: cmake --build build --config Release
+      - name: Build
+        run: cmake --build build --config %BUILD_TYPE% --parallel
