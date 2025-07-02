@@ -26,6 +26,7 @@ signals:
     void refreshClicked();
 
 private slots:
+    void onDeviceSelectionChanged(int index);
     void onDeviceDiscovered(const QString &address, quint16 port);
 
 private:

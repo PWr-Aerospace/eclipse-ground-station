@@ -1,4 +1,4 @@
-#include "DiscoveryPanel.h"
+﻿#include "DiscoveryPanel.h"
 #include "DiscoveryService.h"
 
 #include <QVBoxLayout>
@@ -42,6 +42,8 @@ void DiscoveryPanel::setupUI() {
     refreshButton->setFixedWidth(80);
     devicesCombo->setMinimumWidth(200);
     
+    connectButton->setEnabled(false);
+
     containerLayout->addWidget(devicesCombo);
     containerLayout->addWidget(connectButton);
     containerLayout->addWidget(refreshButton);
@@ -50,6 +52,10 @@ void DiscoveryPanel::setupUI() {
     mainLayout->addStretch();
     mainLayout->addWidget(container);
     
+    connect(devicesCombo,
+        QOverload<int>::of(&QComboBox::currentIndexChanged),
+        this,
+        &DiscoveryPanel::onDeviceSelectionChanged);
     connect(connectButton, &QPushButton::clicked, this, &DiscoveryPanel::connectClicked);
     connect(refreshButton, &QPushButton::clicked, this, &DiscoveryPanel::refreshClicked);
 }
@@ -58,10 +64,6 @@ void DiscoveryPanel::onDeviceDiscovered(const QString &address, quint16 port) {
     if (!discoveredDevices.contains(address)) {
         discoveredDevices.insert(address, port);
         devicesCombo->addItem(QString("Device @ %1").arg(address), address);
-        
-        if (devicesCombo->count() == 1) {
-            connectButton->setEnabled(true);
-        }
         
         statusLabel->setText(QString("Found %1 device(s)").arg(discoveredDevices.size()));
     }
@@ -77,7 +79,10 @@ quint16 DiscoveryPanel::currentDevicePort() const {
     if (address.isEmpty()) return 0;
     return discoveredDevices.value(address);
 }
-
+void DiscoveryPanel::onDeviceSelectionChanged(int index)
+{
+    connectButton->setEnabled(index >= 0 && !isConnected);
+}
 void DiscoveryPanel::updateConnectionStatus(bool connected) {
     isConnected = connected;
     connectButton->setEnabled(!connected && devicesCombo->count() > 0);
